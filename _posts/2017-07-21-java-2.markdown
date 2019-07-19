@@ -1,0 +1,32 @@
+---
+author: wulei
+comments: true
+date: 2017-07-21 02:33:27+00:00
+link: http://wulei.kim/2017/07/21/java-2/
+slug: java-2
+title: Java笔记(2) 多态中的赋值规则
+wordpress_id: 91
+categories:
+- Java
+tags:
+- 多态
+- 赋值
+- 造型
+---
+
+对于一个父类Vehicle和它的两个子类Car和Bicycle，一个Vehicle类的对象变量不仅可以保存一个Vehicle对象，还可以保存它的子类的对象。对于`Vehicle vehicle = new Vehicle();Car car = new Car();vehicle = car;`这样的赋值是安全合法的。这样的对象变量赋值叫做**造型(Cast)**，子类型对象变量复制给父类型对象变量叫做向上造型，显然向上造型是合法的。
+
+`Vehicle vehicle = new Vehicle();
+Car car = new Car();
+car = vehicle;
+`
+
+像这样父类对象变量复制给子类对象变量是不合法的，无法通过编译。但是进行如下修改：
+
+`Vehicle vehicle = new Car();
+Car car = (Car)vehicle;
+`
+
+这样的赋值是可以的。变量vehicle的声明类型为Vehicle，它保存了一个Car类的对象。通过(Car)使vehicle变量可以合法的赋值给car。这是因为vehicle原本就是保存的Car对象，只是声明类型为vehicle，如果通过(Car)使保存Vehicle对象的变量强制赋给car，虽然能通过编译，但在运行时会抛出ClassCastException异常。
+
+所以，在Java的基础类型转换中，类型转换会直接改变变量的值，如`int i = (int)10.2;`而对象变量的造型只是改变变量的声明类型，并不会改变具体的对象。

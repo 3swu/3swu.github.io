@@ -1,0 +1,144 @@
+---
+author: wulei
+comments: true
+date: 2017-07-27 04:56:15+00:00
+link: http://wulei.kim/2017/07/27/java-3/
+slug: java-3
+title: Java笔记(3) I/O流
+wordpress_id: 95
+categories:
+- Java
+tags:
+- I/O
+- 序列化
+---
+
+在没有涉及到对象的保存之前，对象的生命期最多不过在这个程序运行之间。如果我们需要保存一个对象的状态，有两个很简单的方法：
+
+1.将序列化的对象写入文件中。也就是将Java虚拟机将这个对象转换成二进制字串通过数据流写入到二进制文件中，这种方法简单快捷，而且对象的安全性高，因为通过二进制文件修改对象是比较困难的。而且这个方法只适用于用你的Java程序还原出这个对象，别人并不能使用他的Java程序或者非Java程序获取这个对象的状态。
+
+2.将对象的状态写入存文本文件。这种方法使得别人也能轻易的获取这个对象的状态，当然不怀好意的人也能轻易的修改这个对象的状态。
+
+本文重点总结对象序列化的方式。因为写入文本文件的方式简单易理解。
+
+假如有一个冒险游戏，那么这个游戏必须要具有的功能就是能够让玩家保存自己的游戏存档，没有人愿意玩一个每次都得从头开始的冒险游戏。假如这时候游戏场景中有三个人物，分别是三个对象。保存这三个对象只需要下面几步：
+
+1.创建出FileOutputStream
+
+`FileOutputStream fileStream = new FileOutputStream("MyGame.ser");`
+
+这表明需要先创建一个FileOutputStream对象，这个对象可以将字节流写入文件，参数传入该文件名，如果文件不存在，将会被创建。
+
+2.创建ObjectOutputStream
+
+`ObjectOutputStream os = new ObjectOutputStream(fileStream);`
+
+它能将对象传入FileOutputStream对象中，使对象能作为字节流被写入文件。
+
+3.写入对象`
+os.writeObject(characterOne);
+os.writeObject(characterTwo);
+os.writeObject(characterThree);`
+
+将变量所引用的对象序列化并写入MyGame.ser文件。
+
+4.关闭输出串流
+`os.close();`
+
+需要注意的是：
+
+1.如果一个对象中有引用其他的变量，那么当这个对象被序列化时，引用的对象也会被序列化。幸运的是，这一切都是JVM自动帮我们完成的。
+
+2.并不是所有的类都能被序列化，要让一个类被序列化，就要让这个类实现Serializable接口。
+
+3.如果要让某实例变量不能或不应该被序列化，就把它标记为transient(瞬时)的。
+
+还原对象（解序列化）的过程：`
+ObjectInputStream os = new ObjectInputStream(new FileInputStream("MyGame.ser"));
+GameCharacter one = (GameCharacter) os.readObject();
+GameCharacter two = (GameCharacter) os.readObject();
+GameCharacter three = (GameCharacter) os.readObject();
+os.close();
+`
+
+如果FileInputStream传入的参数不存在，则会抛出异常。ObjectInputStream.readObject()方法会返回一个Object对象。所以需要用(GameCharacter) os.readObject();将Object对象造型为GameCharacter对象。
+
+下面是存储于恢复游戏人物的过程：
+
+GameCharacter类
+
+    
+    import java.io.*;
+    public class GameCharacter implements Serializable{
+    	int power;
+    	String type;
+    	String[] weapons;
+    	
+    	public GameCharacter(int p, String t, String[] w){
+    		power = p;
+    		type = t;
+    		weapons = w;
+    	}
+    	
+    	public int getPower(){
+    		return power;
+    	}
+    	
+    	public String getType(){
+    		return type;
+    	}
+    	
+    	public String getWeapons(){
+    		String weaponsList = "";
+    		
+    		for(int i = 0; i < weapons.length; i++){
+    			weaponsList += weapons[i] + " ";
+    		}
+    		return weaponsList;
+    	}
+    }
+
+
+GameSaverTest类
+
+    
+    import java.io.*;
+    
+    public class GameSaverTest {
+    	
+    	public static void main(String[] args) {
+    		GameCharacter one = new GameCharacter(50,"Elf",new String[]{"bow","sword","dust"});
+    		GameCharacter two = new GameCharacter(200,"Troll",new String[]{"bare hands","big ax"});
+    		GameCharacter three = new GameCharacter(120,"Magician",new String[]{"spells","invisibility"});
+    		
+    		try{
+    			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("Game.ser"));
+    			os.writeObject(one);
+    			os.writeObject(two);
+    			os.writeObject(three);
+    			os.close();
+    		}catch(Exception ex){
+    			ex.printStackTrace();
+    		}
+    		one = null;
+    		two = null;
+    		three = null;
+    		try{
+    			ObjectInputStream is = new ObjectInputStream(new FileInputStream("Game.ser"));
+    			GameCharacter oneRestore = (GameCharacter)is.readObject();
+    			GameCharacter twoRestore = (GameCharacter)is.readObject();
+    			GameCharacter threeRestore = (GameCharacter)is.readObject();
+    			is.close();
+    			
+    			System.out.println("One's type: "+oneRestore.getType());
+    			System.out.println("one's weapons: "+oneRestore.getWeapons());
+    			System.out.println("two's type: "+twoRestore.getType());
+    			System.out.println("three's type: "+threeRestore.getType());
+    		}catch(Exception ex){
+    			ex.printStackTrace();
+    		}
+    	}
+    }
+
+
+

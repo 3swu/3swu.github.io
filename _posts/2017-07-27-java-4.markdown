@@ -1,0 +1,114 @@
+---
+author: wulei
+comments: true
+date: 2017-07-27 16:07:06+00:00
+link: http://wulei.kim/2017/07/28/java-4/
+slug: java-4
+title: Java笔记(4) 网络进程间通信
+wordpress_id: 100
+categories:
+- Java
+- 网络编程
+tags:
+- Socket
+---
+
+使用网络让不同的Java进程通信使得程序更加强大，更方便的共享。所有Java网络运行的底层细节都由java.net函数库处理掉了，所以使用Java传送和接受网络上的数据只不过是链接上使用不同串流的I/O而已。这里只讨论Socket编程。
+
+一、Socket
+
+客户端(Client)和服务端(Server)之间建立套接字(Socket)连接是C/S通信的基础，Socket连接标识了Client和Server之间的连接关系。套接字由主机IP地址和进程的TCP端口号组成：Socket = <IP adress>:<TCP port>。
+
+TCP端口：TCP端口是一个16位宽、用来标识主机上特定程序的数字，如HTTP的端口号是80，Telnet的端口号是23，POP3邮件服务器的端口号是110，这些是规定的标准，从0~1023的TCP端口号是保留给已知的服务使用，自己的程序不应该使用这些端口号。我们可以从1024~65535中挑选我们需要的端口号。
+
+二、建立连接
+
+写一个可以从服务器接收消息的简易版聊天程序（称作简易版是因为只能从服务器接受消息，而不能向服务器发消息，要实现给服务器发消息和从服务器接受消息并发执行，需要多线程的支持，后面的文章会讨论）。首先需要建立客户端与服务端的Socket连接。
+`Socket chatSocket = new Socket("127.0.0.1",2333);`
+
+这表示服务器进程位于127.0.0.1的port 2333。为什么选择这个端口号呢，只是因为它看起来很好笑的样子，更重要的是服务器上没有使用这个端口的其他进程。如果在服务端程序中绑定一个端口号时抛出异常，很有可能说明有进程已经使用了这个端口了。
+
+使用BufferedReader从Socket上读取数据：
+
+1.建立链接到Socket上底层输入串流的InputStreamReader
+`InputStreamReader stream = new InputStreamReader(chatSocket.getInputStream());`
+
+2.建立BufferedReader来读取`
+BufferedReader reader = new BufferedReader(stream);
+String msg = reader.readLine();`
+
+总结客户端获取数据的过程：来自服务器的字节流通过InputStreamReader转换成characters, 然后通过BufferedReader转换成buffered  characters, 最后到达Client。
+
+用PrintWriter写数据到Socket：`
+Socket chatSocket = new Socket("127.0.0.1",2333);
+PrintWriter writer = new PrintWriter(chatSocket.getOutputStream());
+writer.print("Hello");
+writer.println(" World");`
+
+现在写出SimpleChatClient客户端程序：
+
+    
+    import java.io.*;
+    import java.net.*;
+    
+    public class SimpleChatClient {
+    	public void go(){
+    		try{
+    			BufferedReader reader = new BufferedReader(
+    					new InputStreamReader(
+    							new Socket("192.168.1.3",5110).getInputStream()));	
+    			
+    			String msg = reader.readLine();
+    			System.out.println("Server says: "+msg);
+    			reader.close();
+    		}catch(IOException ex){
+    			ex.printStackTrace();
+    		}
+    	}
+    	
+    	public static void main(String[] args) {
+    		SimpleChatClient client = new SimpleChatClient();
+    		client.go();
+    	}
+    }
+
+
+与客户端不同，服务器Socket连接的建立方式有一些区别，服务器需要一个Socket来一直监听客户端的连接请求。监听到后创建出与客户端通信的新Socket。
+
+SimpleChatServer程序：
+
+    
+    import java.io.*;
+    import java.net.*;
+    import java.util.Scanner;
+    public class SimpleChatServer {
+    	public void go(){
+    		try{
+    			ServerSocket serverSock = new ServerSocket(5110);
+    			
+    			while(true){
+    				Socket sock = serverSock.accept();
+    				
+    				PrintWriter writer = new PrintWriter(sock.getOutputStream());
+    				writer.println(getMsg());
+    				writer.close();
+    				System.out.println("success");
+    			}
+    		}catch(IOException ex){
+    			ex.printStackTrace();
+    		}
+    	}
+    	
+    	public String getMsg(){
+    		Scanner in = new Scanner(System.in);
+    		return in.next();
+    	}
+    
+    	public static void main(String[] args) {
+    		SimpleChatServer server = new SimpleChatServer();
+    		server.go();
+    	}
+    }
+
+
+服务器在建立好监听Socket后会进入一个无穷循环来服务客户端的请求，ServerSocket.accept()方法会使进程阻塞直到接受到请求。

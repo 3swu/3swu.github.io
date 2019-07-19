@@ -1,0 +1,36 @@
+---
+author: wulei
+comments: true
+date: 2017-10-27 08:23:56+00:00
+link: http://wulei.kim/2017/10/27/restful/
+slug: restful
+title: 理解RESTful风格
+wordpress_id: 224
+categories:
+- 未分类
+tags:
+- RESTful
+---
+
+RESTful架构风格是现在Web应用中广泛使用的一种设计模式。何为REST？ Representational State Transfer, 直译过来是“表现层状态转移”。这个名字使人非常困惑，实际上，REST就是URL只作为名词，面向资源。所有操作名词的动作都用HTTP方法来表示。所以RESTful的架构就是**URL定位资源，用HTTP动词（GET，POST，DELETE，PUT）描述操作**。
+
+下图就是一组RESTful风格的API：
+
+![](http://wulei.kim/wp-content/uploads/2017/10/88c9728a097455854f88d423e1d9b09e_r.png)
+
+
+
+ 	
+  * REST描述的是Client和Server的一种交互形式。REST本身并不实用，实用的是设计RESTful API；
+
+ 	
+  * **URL中绝不能出现动词！**
+
+ 	
+  * 有些动作很难用HTTP动词表现出来怎么办？例如：将a由c传到b。可以将动作设计成服务，对服务进行HTTP操作：`POST /transmission?from=c&to=b {data:a}`；
+
+ 	
+  * 传输的数据格式应尽量使用JSON，避免使用XML；
+
+
+传送门：[RESTful API 设计指南](http://www.ruanyifeng.com/blog/2014/05/restful_api.html)
