@@ -21,7 +21,7 @@ HomeKit平台是苹果的智能家居平台，将支持HomeKit的产品接入这
 
 Homebridge是一个开源的HomeKit桥接器，项目地址[nfarina/Homebridge](https://github.com/nfarina/Homebridge)。Homebridge实现了HomeKit的协议，使得它可以作为设备和HomeKit之间的桥接器。Homebridge收到HomeKit的指令然后通过支持不同设备的插件来实现相应的动作。简单来说，Homebridge就是一个服务器，工作方式如下图：
 
-![](https://wuleiaty.github.io/assets/images/homebridge-1.JPG)
+![](https://wuleiaty.github.io/images/homebridge-1.JPG)
 
 Homebridge支持在Windows/Linux/mac os平台上运行，所以最好的场景是将Homebridge安装在树莓派或者家中的路由器上（使用OpenWRT/LEDE系统的路由器），由于我的树莓派有其他用，所以这次讲讲在我的电脑（Ubuntu 18.04）使用Homebridge，在树莓派上的操作和我这次基本无异。
 
@@ -212,4 +212,4 @@ void loop() {
 
 现在，你就可以试试”嘿 Siri，开灯！”
 
-![](https://wuleiaty.github.io/assets/images/homebridge-2.png)
+![](https://wuleiaty.github.io/images/homebridge-2.png)
