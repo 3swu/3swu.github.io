@@ -12,7 +12,7 @@ tags:
 ### OpenCV-Python安装
 OpenCV是广泛使用的开源计算机视觉库，提供了Python接口，方便进行快速的原型开发。在Ubuntu上安装OpenCV-Python，使用如下命令
 ``` bash
-sudo apt install opencv-python
+pip install opencv-python
 ```
 在程序中使用OpenCV，做如下的包引入即可：
 ``` python
