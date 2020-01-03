@@ -125,7 +125,7 @@ if __name__ == '__main__':
 ```
 ## 实验结果
 本实验在Ubuntu的Python 3.7环境下进行。k取值为1，测试集数量300时，准确率为99%。实验结果如下
-![](res/result.png)
+![](wuleiaty.github.io/images/knn-result.png)
 不同k的取值情况下的实验结果如下表:
 
 | K值 | 准确率 |
